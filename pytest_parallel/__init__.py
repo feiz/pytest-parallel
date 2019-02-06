@@ -68,17 +68,35 @@ class ThreadWorker(threading.Thread):
         self.queue = queue
         self.session = session
 
-    def run(self):
+    def dequeue(self):
         while True:
             try:
-                index = self.queue.get_nowait()
+                return self.queue.get_nowait()
+                break
             except Queue.Empty:
                 break
             except ConnectionRefusedError:
                 time.sleep(.1)
                 continue
-            item = self.session.items[index]
-            run_test(self.session, item, None)
+
+    def get_item(self, index):
+        if index is not None:
+            return self.session.items[index]
+
+    def run(self):
+        next_index = self.dequeue()
+        if next_index is None:
+            return
+
+        while next_index is not None:
+            index = next_index
+            next_index = self.dequeue()
+
+            run_test(
+                self.session,
+                self.get_item(index),
+                self.get_item(next_index))
+
             try:
                 self.queue.task_done()
             except ConnectionRefusedError:
