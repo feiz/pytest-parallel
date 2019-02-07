@@ -27,7 +27,7 @@ def test_concurrent_fixture(testdir):
       '-s',
       '--tests-per-worker=2'
     )
-    result.stdout.fnmatch_lines([
+    result.stdout.fnmatch_lines_random([
         'pytest-parallel: 1 worker (process), 2 tests per worker (threads)',
         '*before sleep test_0',
         '*before sleep test_1',
