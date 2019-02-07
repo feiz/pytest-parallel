@@ -200,13 +200,25 @@ class SafeNumber(object):
         with self._lock:
             return int(self._val.value) > i
 
+    def __ge__(self, i):
+        with self._lock:
+            return int(self._val.value) >= i
+
     def __lt__(self, i):
         with self._lock:
             return int(self._val.value) < i
 
+    def __lt__(self, i):
+        with self._lock:
+            return int(self._val.value) <= i
+
     def __eq__(self, i):
         with self._lock:
             return int(self._val.value) == i
+
+    def __ne__(self, i):
+        with self._lock:
+            return int(self._val.value) != i
 
     def __bool__(self):
         return not self.__eq__(0)
