@@ -54,15 +54,18 @@ def run_test(session, item, nextitem):
 
 
 def process_with_threads(queue, session, tests_per_worker):
-    threads = []
-    for _ in range(tests_per_worker):
-        thread = ThreadWorker(queue, session)
-        thread.start()
-        threads.append(thread)
-    [t.join() for t in threads]
+    if not tests_per_worker:
+        Worker(queue, session).run()
+    else:
+        threads = []
+        for _ in range(tests_per_worker):
+            thread = threading.Thread(target=Worker(queue, session).run)
+            thread.start()
+            threads.append(thread)
+        [t.join() for t in threads]
 
 
-class ThreadWorker(threading.Thread):
+class Worker:
     def __init__(self, queue, session):
         threading.Thread.__init__(self)
         self.queue = queue
@@ -334,7 +337,7 @@ class ParallelRunner(object):
                 evenly_divided = math.ceil(len(session.items)/self.workers)
                 tests_per_worker = min(tests_per_worker, evenly_divided)
             else:
-                tests_per_worker = 1
+                tests_per_worker = 0
         except ValueError:
             raise ValueError(('tests_per_worker can only be '
                               'an integer or "auto"'))
